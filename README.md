@@ -1,64 +1,15 @@
-<style>
-  figure {
-    text-align: center;
-    img {
-      display: block;
-      margin-inline: auto;
-      max-width: 100%;
-    }
-  }
-
-  table.results-table {
-    margin: 24px auto;
-    border-width: 2px 0 2px;
-    border-style: solid;
-    border-color: currentColor;
-    tbody {
-      border-top: 2px solid currentColor;
-    }
-    td, th {
-      border: none;
-    }
-    th {
-      text-align: center;
-      vertical-align: middle;
-    }
-    td {
-      text-align: right;
-    }
-  }
-
-  caption, figcaption { /* caption-side only affects caption */
-    caption-side: top;
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.9em;
-    padding: 0.4em;
-  }
-
-  #demo-gif {
-    font-weight: normal;
-    font-style: italic;
-    display: inline flow-root;
-  }
-
-  a:hover #demo-gif {
-    text-decoration: underline;
-  }
-
-</style>
-
 # Real-time GPU-based collision detection for 2D circular particles in Vulkan
 
-  <figure>
-    <a href="https://youtu.be/tpTzlMHCx9w" target="_blank">
-      <img src="./assets/GPU_simulation_1∕480_128x128_8000_demo.gif" alt="Vulkan 2D particle simulation demo">
-      <figcaption id=demo-gif>
-        (Click on gif for a longer side-by-side showcase of different simulation versions)
-      </figcaption>
-    </a>
-  </figure>
-</a>
+<div align="center">
+  <!-- Both the rel and target attributes' assigned values are an attempt to make the link open in a new tab/window though both may be blocked by GitHub sanitisation -->
+  <a href="https://youtu.be/tpTzlMHCx9w" rel="noopener" target="_blank">
+    <img src="./assets/GPU_simulation_1∕480_128x128_8000_demo.gif" alt="Vulkan 2D particle simulation demo" width=85%>
+  </a>
+  <a href="https://youtu.be/tpTzlMHCx9w" target="_blank"><br/>
+    <!-- If <tt> and <i> are moved on separate lines, then extra empty underlined lines are produced in the rendered output -->
+    <tt><i>(Click on gif for a longer side-by-side showcase of different simulation versions)</i></tt>
+  </a>
+</div>
 
 ## Project Overview
 
@@ -126,9 +77,15 @@ The `chrono::steady_clock` C++ standard library feature is used to record CPU ex
 
 For all data collected in this test, the same time step of $\frac{1}{60}$ seconds and grid side length of 128 cells is used. Particle count varies between 1000-8000 in increments of 1000.
 
-<table class="results-table">
+<table align="center">
   <caption>
-    CPU and GPU execution time metrics based on particle count
+    <div align="center">
+      <samp>
+        <b>
+          CPU and GPU execution time metrics based on particle count
+        </b>
+      </samp>
+    </div>
   </caption>
   <thead>
     <tr>
@@ -146,7 +103,7 @@ For all data collected in this test, the same time step of $\frac{1}{60}$ second
       <th>StdDev (σ)</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody align="right">
     <tr><td>1000</td><td>1.1901</td><td>1.1703</td><td>0.0769</td><td>1.8777</td><td>1.9922</td><td>0.3567</td><td>0.6338</td></tr>
     <tr><td>2000</td><td>1.9851</td><td>1.9468</td><td>0.1309</td><td>1.9414</td><td>2.0337</td><td>0.3312</td><td>1.0225</td></tr>
     <tr><td>3000</td><td>2.6551</td><td>2.6179</td><td>0.1338</td><td>1.7176</td><td>1.8360</td><td>0.4270</td><td>1.5458</td></tr>
@@ -160,10 +117,16 @@ For all data collected in this test, the same time step of $\frac{1}{60}$ second
 
 From the tested range, average CPU execution time is only faster from 1000 to a little before 2000 particles. Afterwards, the GPU takes over in terms of speed, culminating in a **2.85× speedup** at a particle count of 8000.
 
-<figure>
-  <img src="./assets/particle_count_chart.png" alt="CPU vs GPU particle count-based execution times">
-  <figcaption>Average physics update execution time scaling by particle count</figcaption>
-</figure>
+<div align="center">
+  <img src="./assets/particle_count_chart.png" alt="CPU vs GPU particle count-based execution times" align="center" width=80%><br/>
+  <figcaption>
+    <samp>
+      <b>
+        Average physics update execution time scaling by particle count
+      </b>
+    </samp>
+  </figcaption>
+</div>
 
 ### Performance Based on Grid Resolution
 
@@ -171,9 +134,15 @@ For data collected in this grid scale-based test, a constant time step of $\frac
 a particle count of 8000 is used. Grid side length varies from 64 to 512 cells with each
 tested value being twice as large as the previous one.
 
-<table class="results-table">
+<table align="center">
   <caption>
-    CPU and GPU execution time metrics based on grid side length in cells
+    <div align="center">
+      <samp>
+        <b>
+          CPU and GPU execution time metrics based on grid side length in cells
+        </b>
+      </samp>
+    </div>
   </caption>
   <thead>
     <tr>
@@ -191,7 +160,7 @@ tested value being twice as large as the previous one.
       <th>StdDev (σ)</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody align="right">
     <tr><td>64</td><td>4.6670</td><td>4.6338</td><td>0.1495</td><td>1.9578</td><td>1.7572</td><td>0.4312</td><td>2.3838</td></tr>
     <tr><td>128</td><td>6.2573</td><td>6.2248</td><td>0.1637</td><td>1.7282</td><td>1.6768</td><td>0.7871</td><td>3.6208</td></tr>
     <tr><td>256</td><td>9.2370</td><td>9.1676</td><td>0.3234</td><td>2.1341</td><td>2.0803</td><td>0.8164</td><td>4.3283</td></tr>
@@ -201,20 +170,31 @@ tested value being twice as large as the previous one.
 
 Within the recorded grid resolution range, the GPU version's collision detection and resolution execution times for 8000 particles are always faster than its CPU counterpart. The GPU version's advantage keeps widening as the grid side length increases, reaching a **5.33× speedup** at a grid granularity of 512×512 cells.
 
-<figure>
-  <img src="./assets/grid_side_length_chart.png" alt="CPU vs GPU grid side length-based execution times">
-  <figcaption>Average physics update execution time scaling by grid side length. The
-horizontal axis uses a log<sub>2</sub> scale</figcaption>
-</figure>
+<div align="center">
+  <img src="./assets/grid_side_length_chart.png" alt="CPU vs GPU grid side length-based execution times"align="center" width=80%><br/>
+  <figcaption>
+    <samp>
+      <b>
+        Average physics update execution time scaling by grid side length. The horizontal axis uses a log<sub>2</sub> scale
+      </b>
+    </samp>
+  </figcaption>
+</div>
 
 ### Effect of Time Step Scaling
 
 In this test, where time step is the parameter being varied, a particle count of 8000 and
 a grid resolution of 128×128 cells is used. The time step varies between $\frac{1}{60}s$ and $\frac{1}{960}s$ with each step being twice as large as the previous step.
 
-<table class="results-table">
+<table align="center">
   <caption>
-    CPU and GPU performance metrics based on simulation time step
+    <div align="center">
+      <samp>
+        <b>
+          CPU and GPU performance metrics based on simulation time step
+        </b>
+      </samp>
+    </div>
   </caption>
   <thead>
     <tr>
@@ -233,7 +213,7 @@ a grid resolution of 128×128 cells is used. The time step varies between $\frac
       <th>RTF</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody align="right">
     <tr><td>1/60</td><td>6.2486</td><td>6.1428</td><td>0.3150</td><td>2.6673</td><td>2.1204</td><td>2.2129</td><td>0.5433</td><td>7.8601</td></tr>
     <tr><td>1/120</td><td>5.7361</td><td>5.7166</td><td>0.1278</td><td>1.4528</td><td>1.5893</td><td>1.4925</td><td>0.3620</td><td>5.2434</td></tr>
     <tr><td>1/240</td><td>5.3033</td><td>5.3007</td><td>0.1363</td><td>0.7857</td><td>1.0004</td><td>0.9513</td><td>0.1977</td><td>4.1649</td></tr>
@@ -244,11 +224,16 @@ a grid resolution of 128×128 cells is used. The time step varies between $\frac
 
 With 8000 particles, the CPU version loses the ability to simulate virtual time as fast or faster than real time at a time step between $\frac{1}{120}s$ and $\frac{1}{240}s$. Meanwhile, the GPU is able to maintain sumulated time faster than real-word time throughout the tested time step range.
 
-<figure>
-  <img src="./assets/time_step_chart.png" alt="CPU vs GPU time step-based real-time factor scaling">
-  <figcaption>Real-time factor scaling by shrinking time step for a workload of 8000 particles.
-The horizontal axis uses a log<sub>2</sub> scale</figcaption>
-</figure>
+<div align="center">
+  <img src="./assets/time_step_chart.png" alt="CPU vs GPU time step-based real-time factor scaling" width=80%><br/>
+  <figcaption>
+    <samp>
+      <b>
+        Real-time factor scaling by shrinking time step for a workload of 8000 particles. The horizontal axis uses a log<sub>2</sub> scale
+      </b>
+    </samp>
+  </figcaption>
+</div>
 
 ## References
 
