@@ -1,0 +1,109 @@
+#version 460
+
+#include "comp_common.h"
+
+layout (constant_id = 5) const float Elasticity = 0.0;
+
+layout (local_size_x = 256) in;
+
+const uint MaxDeduplicationCount = 32;
+
+void collisionDetection(uint, inout vec2, inout vec2);
+bool checkCollision(uint, uint);
+vec2 adjustPositions(uint, uint);
+vec2 resolveCollision(uint, uint);
+void resolveBoundaryCollisions(uint);
+bool isDuplicate(uint[MaxDeduplicationCount], uint, uint);
+
+void main()
+{
+   uint currentParticleId = gl_GlobalInvocationID.x;
+   if (currentParticleId >= activeParticleCount)
+      return;
+   vec2 totalDisplacement = vec2(0.0);
+   vec2 totalVelocityChange = vec2(0.0);
+   collisionDetection(currentParticleId, totalDisplacement, totalVelocityChange);
+   particles[currentParticleId].center += totalDisplacement;
+   particles[currentParticleId].velocity += totalVelocityChange;
+   resolveBoundaryCollisions(currentParticleId);
+}
+
+void collisionDetection(uint pIdA, inout vec2 totalDisplacement, inout vec2 totalVelocityChange)
+{
+   uint processedParticleIds[MaxDeduplicationCount], processedCount = 0;
+   const float r = particles[pIdA].radius + CellDimension * 0.5;
+   const float angle = CellDimension / r;
+   for (float ai = angle * 0.5; ai < 2.0 * PI; ai += angle) {
+      const float outerPointX = particles[pIdA].center.x + r * cos(ai);
+      const float outerPointY = particles[pIdA].center.y + r * sin(ai);
+      const uint gridX = uint(clamp((outerPointX + 1.0) / CellDimension, 0, GridDimension - 1));
+      const uint gridY = uint(clamp((outerPointY + 1.0) / CellDimension, 0, GridDimension - 1));
+      const uint gId = gridX + gridY * GridDimension;
+      const uint pIdCount = min(grid[gId].idCount, MaxParticlesPerCell);
+      for (uint iId = 0; iId < pIdCount; ++iId) {
+         const uint pIdB = grid[gId].particleIds[iId];
+         if (pIdA == pIdB || isDuplicate(processedParticleIds, processedCount, pIdB)) continue;
+         if (checkCollision(pIdA, pIdB)) {
+            totalDisplacement += adjustPositions(pIdA, pIdB);
+            totalVelocityChange += resolveCollision(pIdA, pIdB);
+            if (processedCount < MaxDeduplicationCount)
+               processedParticleIds[processedCount++] = pIdB;
+         }
+      }
+   }
+}
+
+bool isDuplicate(uint checkedIds[MaxDeduplicationCount], uint checkedCount, uint testId)
+{
+   for (uint i = 0; i < checkedCount; ++i)
+      if (checkedIds[i] == testId) return true;
+   return false;
+}
+
+bool checkCollision(uint pIdA, uint pIdB)
+{
+   const vec2 delta = particles[pIdB].center - particles[pIdA].center;
+   const float radiiSum = particles[pIdA].radius + particles[pIdB].radius;
+   return dot(delta, delta) < radiiSum * radiiSum;
+}
+
+vec2 adjustPositions(uint pIdA, uint pIdB)
+{
+   const vec2 delta = particles[pIdB].center - particles[pIdA].center;
+   const float centersDistance = length(delta);
+   const float penetrationDepth = particles[pIdA].radius + particles[pIdB].radius - centersDistance;
+   if (penetrationDepth <= 0.0) return vec2(0.0);
+   const vec2 impactNormalA = normalize(delta);
+   return -impactNormalA * (penetrationDepth * 0.5);
+}
+
+vec2 resolveCollision(uint pIdA, uint pIdB)
+{
+   const vec2 delta = particles[pIdB].center - particles[pIdA].center;
+   const vec2 impactNormalA = normalize(delta);
+   const vec2 relativeVelocity = particles[pIdB].velocity - particles[pIdA].velocity;
+   const float normalSpeed = dot(relativeVelocity, impactNormalA);
+   if (normalSpeed > 0.0) return vec2(0.0);
+   float impulse = (-(1.0 + Elasticity) * normalSpeed) * 0.5;
+   if (impulse > 1.0) impulse = 1.0;
+   return -impactNormalA * impulse;
+}
+
+void resolveBoundaryCollisions(uint pId)
+{
+   // bottom
+   if (particles[pId].center.y + particles[pId].radius > 1.0) {
+      particles[pId].center.y = 1.0 - particles[pId].radius;
+      particles[pId].velocity.y *= -Elasticity;
+   }
+   // left side
+   if (particles[pId].center.x - particles[pId].radius < -1.0) {
+      particles[pId].center.x = -1.0 + particles[pId].radius;
+      particles[pId].velocity.x *= -Elasticity;
+   }
+   // right side
+   if (particles[pId].center.x + particles[pId].radius > 1.0) {
+      particles[pId].center.x = 1.0 - particles[pId].radius;
+      particles[pId].velocity.x *= -Elasticity;
+   }
+}

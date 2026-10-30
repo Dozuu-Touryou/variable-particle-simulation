@@ -1,0 +1,44 @@
+#version 460 
+
+#include "comp_common.h"
+
+layout (constant_id = 2) const float GravityY = 0.0;
+layout (constant_id = 3) const float TimeStep = 0.00;
+layout (constant_id = 6) const float VelocityDamper = 0.0;
+
+const vec2 Gravity = vec2(0.0, GravityY);
+
+layout (local_size_x = 256) in;
+
+void applyGravity(uint);
+void mapParticle(uint);
+
+void main()
+{
+   uint currentParticleId = gl_GlobalInvocationID.x;
+   if (currentParticleId >= activeParticleCount) return;
+   applyGravity(currentParticleId);
+   mapParticle(currentParticleId);
+}
+
+void applyGravity(uint pId)
+{
+   particles[pId].velocity += Gravity * TimeStep;
+   particles[pId].center += particles[pId].velocity * TimeStep;
+   particles[pId].velocity *= VelocityDamper;
+}
+
+void mapParticle(uint pId)
+{
+   const float angle = CellDimension / particles[pId].radius;
+   for (float ai = angle * 0.5; ai < 2.0 * PI; ai += angle) {
+      const float circlePointX = particles[pId].center.x + particles[pId].radius * cos(ai);
+      const float circlePointY = particles[pId].center.y + particles[pId].radius * sin(ai);
+      const uint gridX = uint(clamp((circlePointX + 1.0) / CellDimension, 0, GridDimension - 1));
+      const uint gridY = uint(clamp((circlePointY + 1.0) / CellDimension, 0, GridDimension - 1));
+      const uint gridId = gridX + gridY * GridDimension;
+      const uint pIdIndex = atomicAdd(grid[gridId].idCount, 1);
+      if (pIdIndex < MaxParticlesPerCell)
+         grid[gridId].particleIds[pIdIndex] = pId;
+   }
+}
