@@ -184,7 +184,7 @@ Within the recorded grid resolution range, the GPU version's collision detection
 ### Effect of Time Step Scaling
 
 In this test, where time step is the parameter being varied, a particle count of 8000 and
-a grid resolution of 128×128 cells is used. The time step varies between $\frac{1}{60}s$ and $\frac{1}{960}s$ with each step being twice as large as the previous step.
+a grid resolution of 128×128 cells is used. The time step varies between $\frac{1}{60}s$ and $\frac{1}{960}s$ with each step being half as large as the previous one.
 
 <table align="center">
   <caption>
